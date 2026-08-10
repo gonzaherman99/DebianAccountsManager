@@ -259,6 +259,10 @@ elif [ "$MENU" = "15" ]; then
         fi
     done
 
+elif [[ "$MENU" = "16" ]]; then
+
+    sudo lastb | less
+
 fi
 
 done
