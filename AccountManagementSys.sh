@@ -65,7 +65,7 @@ MENU=$(whiptail --title "Account Managment System" --menu "Choose an option" 27 
 
 exitstatus=$?
 
-if [[ "$CHOICE" = "Quit" || "$exitstatus" != 0  ]]; then
+if [[ "$MENU" = "0" || "$exitstatus" != 0  ]]; then
     
     echo "See you later!"
     break
@@ -226,7 +226,7 @@ elif [ "$MENU" = "13" ]; then
 
     USERNAME=$(inputbox_wrapper "Add a user" "Type the username to create below.")
 
-    sudo useradd "$USERNAME" 
+    on_handle_error sudo useradd "$USERNAME" 
 
 elif [ "$MENU" = "14" ]; then
 
