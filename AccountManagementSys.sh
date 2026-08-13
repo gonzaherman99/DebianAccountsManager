@@ -1,6 +1,6 @@
 #! /bin/bash
 
-FOLDER="AccountManagmentSys"
+FOLDER="AccountManagerSys"
 
 
 folderfind=$(find /tmp -maxdepth 1 -name "$FOLDER" -type d -printf 1 -quit)
@@ -15,13 +15,17 @@ fi
 
 on_handle_error() {
     local output
-    output=$("$@" 2>&1)
+    output=$("$@" 2>&1) 
     local status=$?
+
 
     if [ "$status" -ne 0 ]; then
         whiptail --title "Error" --msgbox "$output , exit with status: $status"  12 78
+    #elif [ -n "$output" ]; then
+    #   whiptail --title "Message" --msgbox "$output , exit with status: $status"  12 78
+    else
+        printf '%s\n' "$output"
     fi
-
 
     return "$status"
 }
@@ -73,20 +77,20 @@ if [[ "$MENU" = "0" || "$exitstatus" != 0  ]]; then
 elif [ "$MENU" = "1" ]; then
 
 
-    on_handle_error echo "$(cut -d: -f1 /etc/passwd)" > /tmp/"$FOLDER"/all_users
+    on_handle_error sudo cut -d: -f1 /etc/passwd > /tmp/"$FOLDER"/all_users
                   
-    whiptail --textbox --scrolltext /tmp/"$FOLDER"/all_users 30 80
+    whiptail --textbox  /tmp/"$FOLDER"/all_users 30 80
 
     
 elif [ "$MENU" = "2" ]; then
 
-    echo "$(sudo passwd -S -a | cut -d " " -f 1,3)" > /tmp/"$FOLDER"/last_password
+    on_handle_error echo "$(sudo passwd -S -a | cut -d " " -f 1,3)" > /tmp/"$FOLDER"/last_password
 
-     whiptail --textbox --scrolltext /tmp/"$FOLDER"/last_password 30 80
+    whiptail --textbox --scrolltext /tmp/"$FOLDER"/last_password 30 80
 
 elif [ "$MENU" = "3" ]; then
 
-    on_handle_error echo "$cut -f 1 -d: /etc/passwd | xargs -n 100 -I {} bash -c " echo -e '\n{}' ; sudo chage -l {} | sed -n 2p"" > tee /tmp/"$FOLDER"/password_expirations
+    on_handle_error cut -f 1 -d: /etc/passwd | xargs -n 1 -I {} bash -c " echo -e '\n{}' ; sudo chage -l {} | sed -n 2p" > /tmp/"$FOLDER"/password_expirations
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/password_expirations 30 80
 
@@ -167,11 +171,27 @@ elif [ "$MENU" = "10" ]; then
 
         USERNAME=$(inputbox_wrapper "Change a login shell" "Type the username below.")
 
-        
+        exitstatus=$?
 
         if [[ -n "$USERNAME" ]]; then
-            on_handle_error sudo chsh "$USERNAME"
-            break;
+
+            NEWSHELL=$(inputbox_wrapper "Change a login shell" "Type the new login shell below.")
+
+            if [[ -n "$NEWSHELL" ]]; then
+
+                on_handle_error sudo chsh -s "$NEWSHELL" "$USERNAME"
+
+                break;
+
+            elif [[ "$exitstatus" != 0 ]]; then
+
+                echo "User selected cancel."
+                break;   
+
+            else 
+                failed_non_value_entered
+            fi
+            
         elif [[ "$exitstatus" != 0 ]]; then
             echo "User selected cancel."
             break;
@@ -261,7 +281,7 @@ elif [ "$MENU" = "15" ]; then
 
 elif [[ "$MENU" = "16" ]]; then
 
-    sudo lastb | less
+    sudo last | less
 
 fi
 
