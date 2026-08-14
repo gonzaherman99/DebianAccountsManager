@@ -18,11 +18,14 @@ on_handle_error() {
     output=$("$@" 2>&1) 
     local status=$?
 
+    echo "$output"
 
     if [[ "$status" -ne 0 ]]; then
         whiptail --title "Error" --msgbox "$output , exit with status: $status"  8 78
+    #elif [[ "$status" -eq 0 && -n "$output" ]]; then
+    #    whiptail --title "Success" --msgbox "$output , exit with status: $status" 8 78
     elif [[ "$status" -eq 0 && -n "$output" ]]; then
-        whiptail --title "Success" --msgbox "$output , exit with status: $status" 8 78
+        whiptail --title "Message" --msgbox "$output , exit with status: $status"  8 78
     else 
         printf '%s\n' "$output"
     fi
@@ -79,7 +82,7 @@ elif [ "$MENU" = "1" ]; then
 
     on_handle_error sudo cut -d: -f1 /etc/passwd > /tmp/"$FOLDER"/all_users
                   
-    whiptail --textbox  /tmp/"$FOLDER"/all_users 30 80
+    whiptail --textbox --scrolltext /tmp/"$FOLDER"/all_users 30 60
 
     
 elif [ "$MENU" = "2" ]; then
@@ -112,7 +115,7 @@ elif [ "$MENU" = "6" ]; then
 
         USERNAME=$(inputbox_wrapper "Lock a user"  "Type the username below.")
 
-        on_handle_error usermod -L "$USERNAME" 2>&1
+        on_handle_error sudo usermod -L "$USERNAME" 2>&1
         
 elif [ "$MENU" = "7" ]; then
 
@@ -123,7 +126,7 @@ elif [ "$MENU" = "7" ]; then
         exitstatus=$?
 
         if [[ -n "$USERNAME" ]]; then
-            on_handle_error usermod --unlock "$USERNAME" 2>&1
+            on_handle_error sudo usermod --unlock "$USERNAME" #2>&1
             break;
         elif [[ "$exitstatus" != 0 ]]; then
             echo "User selected cancel."
@@ -206,11 +209,16 @@ elif [ "$MENU" = "11" ]; then
     while true; do
 
         USERNAME=$(inputbox_wrapper "Account details" "Type the username below.")
+        FULLNAME=$(inputbox_wrapper "Account details (Full Name)" "Type the full name below.")
+        ROOMNUMBER=$(inputbox_wrapper "Account details (Room Number)" "Type the room number below.")
+        WORKPHONE=$(inputbox_wrapper "Account details (Work Phone)" "Type the work phone number below.")
+        HOMEPHONE=$(inputbox_wrapper "Account details (Home Phone)" "Type the home phone number below.")
+        OTHER=$(inputbox_wrapper "Account details (Other)" "Type Other details below.")
 
         exitstatus=$?
 
         if [[ -n "$USERNAME" ]]; then
-            on_handle_error sudo chfn "$USERNAME"
+            on_handle_error sudo chfn -f "$FULLNAME" -r "$ROOMNUMBER" -w "$WORKPHONE" -h "$HOMEPHONE"  -o "$OTHER" "$USERNAME"
             break;
         elif [[ "$exitstatus" != 0 ]]; then
             echo "User selected cancel."
@@ -231,7 +239,8 @@ elif [ "$MENU" = "12" ]; then
         exitstatus=$?
 
         if [[ -n "$USERNAME" ]]; then
-            on_handle_error sudo finger "$USERNAME" | less
+            on_handle_error sudo finger testuser > /tmp/"$FOLDER"/userdetails
+            whiptail --textbox /tmp/"$FOLDER"/userdetails 12 80
             break;
         elif [[ "$exitstatus" != 0 ]]; then
             echo "User selected cancel."
