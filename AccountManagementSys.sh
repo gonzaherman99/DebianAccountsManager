@@ -19,11 +19,11 @@ on_handle_error() {
     local status=$?
 
 
-    if [ "$status" -ne 0 ]; then
-        whiptail --title "Error" --msgbox "$output , exit with status: $status"  12 78
-    #elif [ -n "$output" ]; then
-    #   whiptail --title "Message" --msgbox "$output , exit with status: $status"  12 78
-    else
+    if [[ "$status" -ne 0 ]]; then
+        whiptail --title "Error" --msgbox "$output , exit with status: $status"  8 78
+    elif [[ "$status" -eq 0 && -n "$output" ]]; then
+        whiptail --title "Success" --msgbox "$output , exit with status: $status" 8 78
+    else 
         printf '%s\n' "$output"
     fi
 
@@ -244,9 +244,23 @@ elif [ "$MENU" = "12" ]; then
 
 elif [ "$MENU" = "13" ]; then
 
-    USERNAME=$(inputbox_wrapper "Add a user" "Type the username to create below.")
+    while true; do
 
-    on_handle_error sudo useradd "$USERNAME" 
+        USERNAME=$(inputbox_wrapper "Add a user" "Type the username to create below.")
+
+        exitstatus=$?
+
+        if [[ -n "$USERNAME" ]]; then
+            on_handle_error sudo useradd "$USERNAME"
+            break
+        elif [[ "$exitstatus" != 0 ]]; then
+            echo "User selected cancel."
+            break
+        else
+            failed_non_value_entered
+        fi
+
+    done
 
 elif [ "$MENU" = "14" ]; then
 
