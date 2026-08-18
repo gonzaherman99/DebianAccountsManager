@@ -1,6 +1,0 @@
-Login: testuser       			Name: luis
-Directory: /home/testuser           	Shell: /bin/nologin
-Office: 555, 555			Home Phone: 555
-Never logged in.
-No mail.
-No Plan.
