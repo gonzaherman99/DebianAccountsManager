@@ -27,7 +27,7 @@ on_handle_error() {
     elif [[ "$status" -eq 0 && -n "$output" ]]; then
         whiptail --title "Message" --msgbox "$output , exit with status: $status"  8 78
     else 
-        printf '%s\n' "$output"
+       printf '%s\n' "$output"
     fi
 
     return "$status"
@@ -87,13 +87,13 @@ elif [ "$MENU" = "1" ]; then
     
 elif [ "$MENU" = "2" ]; then
 
-    on_handle_error echo "$(sudo passwd -S -a | cut -d " " -f 1,3)" > /tmp/"$FOLDER"/last_password
+    on_handle_error sudo passwd -S -a | cut -d " " -f 1,3 > /tmp/"$FOLDER"/last_password
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/last_password 30 80
 
 elif [ "$MENU" = "3" ]; then
 
-    on_handle_error cut -f 1 -d: /etc/passwd | xargs -n 1 -I {} bash -c " echo -e '\n{}' ; sudo chage -l {} | sed -n 2p" > /tmp/"$FOLDER"/password_expirations
+    on_handle_error cut -f 1 -d: /etc/passwd | while IFS= read -r user; do printf "\n%s\n" "$user"; sudo chage -l "$user" | sed -n 2p; done > /tmp/"$FOLDER"/password_expirations
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/password_expirations 30 80
 
