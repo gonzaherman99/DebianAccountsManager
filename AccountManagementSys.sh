@@ -153,17 +153,13 @@ elif [ "$MENU" = "8" ]; then
 
 elif [ "$MENU" = "9" ]; then
 
-    on_handle_error touch /tmp/"$FOLDER"/neverloggedin
 
     for user in $(cut -d: -f1 /etc/passwd); do
-        if ! lastlog -u $user | grep -q "Never logged in"; then
-        continue
-    fi
-
-
-    echo "$user has never logged in" >> /tmp/"$FOLDER"/neverloggedin
-
+        if lastlog -u "$user" | grep -q "Never logged in"; then
+            echo "$user has never logged in" >> /tmp/"$FOLDER"/neverloggedin
+        fi
     done
+
 
      whiptail --textbox /tmp/"$FOLDER"/neverloggedin 12 80
 
