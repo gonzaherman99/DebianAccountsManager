@@ -1,0 +1,22 @@
+{
+  "name": "accountmanagersys",
+  "version": "1.0.0",
+  "description": "Account Management System",
+  "main": "index.js",
+  "scripts": {
+    "test": "bats test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gonzaherman99/DebianAccountsManager.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gonzaherman99/DebianAccountsManager/issues"
+  },
+  "homepage": "https://github.com/gonzaherman99/DebianAccountsManager#readme",
+  "devDependencies": {
+    "bats": "^1.13.0"
+  }
+}

@@ -72,53 +72,43 @@ MENU=$(whiptail --title "Account Managment System" --menu "Choose an option" 27 
 
 exitstatus=$?
 
-if [[ "$MENU" = "0" || "$exitstatus" != 0  ]]; then
-    
-    echo "See you later!"
-    break
-
-elif [ "$MENU" = "1" ]; then
-
-
+option_1() {
     on_handle_error sudo cut -d: -f1 /etc/passwd > /tmp/"$FOLDER"/all_users
                   
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/all_users 30 60
+}
 
-    
-elif [ "$MENU" = "2" ]; then
-
+option_2() {
     on_handle_error sudo passwd -S -a | cut -d " " -f 1,3 > /tmp/"$FOLDER"/last_password
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/last_password 30 80
+}
 
-elif [ "$MENU" = "3" ]; then
-
+option_3() {
     on_handle_error cut -f 1 -d: /etc/passwd | while IFS= read -r user; do printf "\n%s\n" "$user"; sudo chage -l "$user" | sed -n 2p; done > /tmp/"$FOLDER"/password_expirations
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/password_expirations 30 80
+}
 
-
-elif [ "$MENU" = "4" ]; then
-
-     on_handle_error cut -d: -f1 /etc/passwd | xargs groups > /tmp/"$FOLDER"/users_groups
+option_4() {
+    on_handle_error cut -d: -f1 /etc/passwd | xargs groups > /tmp/"$FOLDER"/users_groups
 
      whiptail --textbox --scrolltext /tmp/"$FOLDER"/users_groups 30 80 
+}
 
-elif [ "$MENU" = "5" ]; then
-
+option_5() {
     on_handle_error sudo passwd -S -a | grep L | cut -d " " -f1 > /tmp/"$FOLDER"/locked_users
 
     whiptail --textbox --scrolltext /tmp/"$FOLDER"/locked_users 30 80 
+}
 
+option_6() {
+    USERNAME=$(inputbox_wrapper "Lock a user"  "Type the username below.")
 
-elif [ "$MENU" = "6" ]; then
+    on_handle_error sudo usermod -L "$USERNAME" 2>&1
+}
 
-        USERNAME=$(inputbox_wrapper "Lock a user"  "Type the username below.")
-
-        on_handle_error sudo usermod -L "$USERNAME" 2>&1
-        
-elif [ "$MENU" = "7" ]; then
-
+option_7() {
     while true; do
 
        USERNAME=$(inputbox_wrapper "Unlock a user" "Type the username below.")
@@ -136,9 +126,9 @@ elif [ "$MENU" = "7" ]; then
         fi
     
     done
+}
 
-elif [ "$MENU" = "8" ]; then
-
+option_8() {
     GETINFO=$(on_handle_error getent group sudo | awk -F: '{print $4}' |  tr "," " ") 
 
     if [[ -n "$GETINFO" ]]; then
@@ -149,11 +139,9 @@ elif [ "$MENU" = "8" ]; then
     else
         whiptail --msgbox "No users found with sudo privileges" 8 78
     fi
+}
 
-
-elif [ "$MENU" = "9" ]; then
-
-
+option_9() {
     for user in $(cut -d: -f1 /etc/passwd); do
         if lastlog -u "$user" | grep -q "Never logged in"; then
             echo "$user has never logged in" >> /tmp/"$FOLDER"/neverloggedin
@@ -162,10 +150,9 @@ elif [ "$MENU" = "9" ]; then
 
 
      whiptail --textbox /tmp/"$FOLDER"/neverloggedin 12 80
+}
 
-elif [ "$MENU" = "10" ]; then
-
-
+option_10() {
     while true; do
 
         USERNAME=$(inputbox_wrapper "Change a login shell" "Type the username below.")
@@ -199,10 +186,10 @@ elif [ "$MENU" = "10" ]; then
         fi
     
     done
+}
 
-elif [ "$MENU" = "11" ]; then
-
-    while true; do
+option_11() {
+     while true; do
 
         USERNAME=$(inputbox_wrapper "Account details" "Type the username below.")
         FULLNAME=$(inputbox_wrapper "Account details (Full Name)" "Type the full name below.")
@@ -224,10 +211,11 @@ elif [ "$MENU" = "11" ]; then
         fi
     
     done
-   
 
-elif [ "$MENU" = "12" ]; then
+    return $?
+}
 
+option_12() {
     while true; do
 
         USERNAME=$(inputbox_wrapper "User details" "Type the username below.")
@@ -247,9 +235,11 @@ elif [ "$MENU" = "12" ]; then
     
     done
 
-elif [ "$MENU" = "13" ]; then
+    return $?
+}
 
-    while true; do
+option_13() {
+     while true; do
 
         USERNAME=$(inputbox_wrapper "Add a user" "Type the username to create below.")
 
@@ -267,15 +257,17 @@ elif [ "$MENU" = "13" ]; then
 
     done
 
-elif [ "$MENU" = "14" ]; then
+    return $?
+}
 
+option_14() {
     USERNAME=$(inputbox_wrapper "Delete a user" "Type the username below.")
 
     on_handle_error sudo userdel "$USERNAME"
+}
 
-elif [ "$MENU" = "15" ]; then
-
-    while true; do
+option_15() {
+     while true; do
 
         USERNAME=$(inputbox_wrapper "User group change" "Type the username below.")
 
@@ -297,6 +289,72 @@ elif [ "$MENU" = "15" ]; then
             fi
         fi
     done
+}
+
+if [[ "$MENU" = "0" || "$exitstatus" != 0  ]]; then
+    
+    echo "See you later!"
+    break
+
+elif [ "$MENU" = "1" ]; then
+
+    option_1
+    
+elif [ "$MENU" = "2" ]; then
+
+    option_2
+
+elif [ "$MENU" = "3" ]; then
+
+    option_3
+
+elif [ "$MENU" = "4" ]; then
+
+     option_4
+
+elif [ "$MENU" = "5" ]; then
+
+    option_5
+
+elif [ "$MENU" = "6" ]; then
+
+    option_6
+        
+elif [ "$MENU" = "7" ]; then
+
+    option_7
+
+elif [ "$MENU" = "8" ]; then
+
+    option_8
+
+elif [ "$MENU" = "9" ]; then
+
+    option_9
+
+elif [ "$MENU" = "10" ]; then
+
+    option_10
+
+elif [ "$MENU" = "11" ]; then
+
+    option_11
+   
+elif [ "$MENU" = "12" ]; then
+
+    option_12
+
+elif [ "$MENU" = "13" ]; then
+
+    option_13
+
+elif [ "$MENU" = "14" ]; then
+
+    option_14
+
+elif [ "$MENU" = "15" ]; then
+
+    option_15
 
 elif [[ "$MENU" = "16" ]]; then
 
